@@ -1,5 +1,7 @@
 import csv
 import pandas as pd
+import random
+
 text_file = open("symptoms.txt", "r")
 lines = text_file.readlines()[0].split(',')
 lines.insert(0,'disease')
@@ -21,5 +23,8 @@ with open('converted_data.csv', mode='w') as converted_data:
                     index=lines.index(r.strip())
                     arr[index]=1
             if(i==17):
+                for i in range(3) :
+                    index = random.randint(1, 17)
+                    arr[index] = 1
                 writer.writerow(arr)
 
