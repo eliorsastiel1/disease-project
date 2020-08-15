@@ -10,10 +10,22 @@ import seaborn as sns
 from collections import Counter
 
 dataset = pd.read_csv('converted_data.csv')
+corr_matrix = dataset.groupby(['disease']).sum().corr().abs()
+
+#plt.matshow(corr_matrix)
+#plt.show()
+threshold=0.5
+upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
+#remove features with correlation higher then threshold 
+to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
+dataset=dataset.drop(columns=to_drop)
+
+
 Y=dataset['disease']
-print(Y.unique().shape)
+#print(Y.unique().shape)
 X=dataset.loc[:, dataset.columns != 'disease']
 
+print(X.shape)
 
 def PCA_Analysis():
 
@@ -96,4 +108,4 @@ def TSNE_Analysis():
 
 
 #PCA_Analysis()
-#TSNE_Analysis()
+TSNE_Analysis()
