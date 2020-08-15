@@ -3,6 +3,7 @@ import pandas as pd
 
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+from sklearn.feature_selection import VarianceThreshold
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -10,21 +11,49 @@ import seaborn as sns
 from collections import Counter
 
 dataset = pd.read_csv('converted_data.csv')
-corr_matrix = dataset.groupby(['disease']).sum().corr().abs()
-
-#plt.matshow(corr_matrix)
-#plt.show()
-threshold=0.5
-upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
-#remove features with correlation higher then threshold 
-to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
-dataset=dataset.drop(columns=to_drop)
 
 
 Y=dataset['disease']
 #print(Y.unique().shape)
 X=dataset.loc[:, dataset.columns != 'disease']
 
+#thresholder = VarianceThreshold(threshold=.5)
+
+# Conduct variance thresholding
+#data_high_variance = thresholder.fit_transform(dataset.values)
+
+def featureVarianceEstimator(threshold=0.1,show=False):
+    variance=X.agg('var')
+    if show:
+        plt.hist(variance)
+        plt.title('Feature Variance Histogram')
+        plt.xlabel('Varaiance')
+        plt.ylabel('Occurrence')
+        plt.show()
+    criteria=variance>threshold
+    return X[criteria.index[criteria]]
+
+
+
+
+def featureCorrelationEstimator(threshold=0.1,show=False):
+    corr_matrix = dataset.groupby(['disease']).sum().corr().abs()
+    if show:
+        plt.matshow(corr_matrix)
+        plt.title('Feature correlation matrix')
+        plt.xlabel('Features [Index]')
+        plt.ylabel('Features [Index]')
+        plt.show()
+    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
+    #remove features with correlation higher then threshold 
+    to_drop = [column for column in upper.columns if any(upper[column] > threshold)]
+    return dataset.drop(columns=to_drop)
+
+
+#dataset=featureCorrelationEstimator(threshold=0.5,show=True)
+#X=dataset.loc[:, dataset.columns != 'disease']
+#exit()
+X=featureVarianceEstimator(threshold=0.155)
 print(X.shape)
 
 def PCA_Analysis():
