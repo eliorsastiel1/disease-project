@@ -10,20 +10,24 @@ from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 from collections import Counter
 
+
+from sklearn.model_selection import train_test_split
+
+from sklearn import metrics
+from sklearn import neighbors
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import confusion_matrix
+from tqdm import tqdm
+from sklearn.neighbors import KNeighborsClassifier
+
 dataset = pd.read_csv('converted_data.csv')
 
 
-Y=dataset['disease']
-#print(Y.unique().shape)
-X=dataset.loc[:, dataset.columns != 'disease']
 
-#thresholder = VarianceThreshold(threshold=.5)
 
-# Conduct variance thresholding
-#data_high_variance = thresholder.fit_transform(dataset.values)
 
 def featureVarianceEstimator(threshold=0.1,show=False):
-    variance=X.agg('var')
+    variance=dataset.agg('var')
     if show:
         plt.hist(variance)
         plt.title('Feature Variance Histogram')
@@ -31,7 +35,9 @@ def featureVarianceEstimator(threshold=0.1,show=False):
         plt.ylabel('Occurrence')
         plt.show()
     criteria=variance>threshold
-    return X[criteria.index[criteria]]
+    idx=criteria.index[criteria]
+    idx=idx.insert(0,'disease')
+    return dataset[idx]
 
 
 
@@ -50,13 +56,7 @@ def featureCorrelationEstimator(threshold=0.1,show=False):
     return dataset.drop(columns=to_drop)
 
 
-#dataset=featureCorrelationEstimator(threshold=0.5,show=True)
-#X=dataset.loc[:, dataset.columns != 'disease']
-#exit()
-X=featureVarianceEstimator(threshold=0.155)
-print(X.shape)
-
-def PCA_Analysis():
+def PCA_Analysis(X,Y):
 
     pca = PCA(n_components=3)
     pca_result = pca.fit_transform(X.values)
@@ -93,7 +93,7 @@ def PCA_Analysis():
     plt.show()
 
 
-def TSNE_Analysis():
+def TSNE_Analysis(X,Y):
     diseases = Counter()
     idxs=[]
     # TSNE_Analysis()
@@ -136,5 +136,17 @@ def TSNE_Analysis():
     plt.show()
 
 
-#PCA_Analysis()
-TSNE_Analysis()
+
+#dataset=featureCorrelationEstimator(threshold=0.5,show=True)
+#X=dataset.loc[:, dataset.columns != 'disease']
+#exit()
+
+dataset_reduced=featureVarianceEstimator(threshold=0.1)
+dataset_reduced.to_csv('reducedDataset.csv')
+
+Y=dataset_reduced['disease']
+X=dataset_reduced.loc[:, dataset_reduced.columns != 'disease']
+
+
+#PCA_Analysis(X,Y)
+TSNE_Analysis(X,Y)
