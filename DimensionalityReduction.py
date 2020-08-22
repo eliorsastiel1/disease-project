@@ -3,22 +3,12 @@ import pandas as pd
 
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-from sklearn.feature_selection import VarianceThreshold
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
+
 from collections import Counter
 
-
-from sklearn.model_selection import train_test_split
-
-from sklearn import metrics
-from sklearn import neighbors
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.metrics import confusion_matrix
-from tqdm import tqdm
-from sklearn.neighbors import KNeighborsClassifier
 
 dataset = pd.read_csv('converted_data.csv')
 
