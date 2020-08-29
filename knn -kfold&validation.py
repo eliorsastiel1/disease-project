@@ -1,8 +1,9 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
-
+from sklearn.model_selection import KFold
 def knn(X_train, X_test, y_train, y_test,showPlot=False):
     print('started KNN')
     X_test, X_validate, y_test, y_validate = train_test_split(X_test, y_test, test_size=0.3)
@@ -31,7 +32,7 @@ def knn(X_train, X_test, y_train, y_test,showPlot=False):
       return
     y_pred = knnMax.predict(X_validate)
     score = knnMax.score(X_validate, y_validate)
-    return score
+    return knnMax,score
     
 
 
@@ -43,12 +44,27 @@ featureNames =df.columns[2:]
 
 #knn(X_train, X_test, y_train, y_test,showPlot=True)
 
+X, X_test, y, y_test = train_test_split(X, y, test_size=0.1)
+y = np.array(y)
+print(y)
+splits=5
+
+kf = KFold(n_splits=splits)
+#kf.get_n_splits(X)
 finalscore=0
-kfolds=5
-for fold in range(0,kfolds):
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-  finalscore=finalscore+knn(X_train, X_test, y_train, y_test,showPlot=False)
-print(finalscore/kfolds)
+last_score=0
+best_model=None
+for train_index, test_index in kf.split(X):
+  X_train, X_validate = X[train_index], X[test_index]
+  y_train, y_validate = y[train_index], y[test_index]
+  model,score=knn(X_train, X_validate, y_train, y_validate,showPlot=False)
+  if score>last_score:
+    best_model=model
+    last_score=score
+  finalscore=finalscore+score
+print(finalscore/splits)
+print(best_model.score(X_test, y_test))
+
 
 
 
